@@ -7,6 +7,8 @@ import (
 
 	"./models"
 	"./utils"
+
+	"github.com/codegangsta/martini"
 )
 
 var posts map[string]*models.Post
@@ -82,14 +84,18 @@ func main() {
 
 	posts = make(map[string]*models.Post, 0)
 
-	//m := martini.Classic()
+	m := martini.Classic()
 
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
-	http.HandleFunc("/", IndexHandler)
-	http.HandleFunc("/write", writeHandler)
-	http.HandleFunc("/edit", editHandler)
-	http.HandleFunc("/delete", deleteHandler)
-	http.HandleFunc("/SavePost", savePostHandler)
+	//http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
 
-	http.ListenAndServe(":3000", nil)
+	staticOptions := martini.StaticOptions{Prefix: "assets"}
+	m.Use(martini.Static("assets", staticOptions))
+	m.Get("/", IndexHandler)
+	m.Get("/write", writeHandler)
+	m.Get("/edit", editHandler)
+	m.Get("/delete", deleteHandler)
+	m.Post("/SavePost", savePostHandler)
+
+	//http.ListenAndServe(":3000", nil)
+	m.Run()
 }
