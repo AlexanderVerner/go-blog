@@ -37,12 +37,12 @@ func writeHandler(rnd render.Render) {
 	rnd.HTML(200, "write", nil)
 }
 
-func editHandler(rnd render.Render, r *http.Request) {
+func editHandler(rnd render.Render, r *http.Request, params martini.Params) {
 	/*t, err := template.ParseFiles("templates/write.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 	}*/
-	id := r.FormValue("id")
+	id := params["id"]
 	post, found := posts[id]
 	if !found {
 		rnd.Redirect("/")
@@ -73,8 +73,8 @@ func savePostHandler(rnd render.Render, r *http.Request) {
 	rnd.Redirect("/")
 }
 
-func deleteHandler(rnd render.Render, r *http.Request) {
-	id := r.FormValue("id")
+func deleteHandler(rnd render.Render, r *http.Request, params martini.Params) {
+	id := params["id"]
 	if id == "" {
 		//http.NotFound(w, r)
 		rnd.Redirect("/")
@@ -111,8 +111,8 @@ func main() {
 	m.Use(martini.Static("assets", staticOptions))
 	m.Get("/", IndexHandler)
 	m.Get("/write", writeHandler)
-	m.Get("/edit", editHandler)
-	m.Get("/delete", deleteHandler)
+	m.Get("/edit/:id", editHandler)
+	m.Get("/delete/:id", deleteHandler)
 	m.Post("/SavePost", savePostHandler)
 
 	//http.ListenAndServe(":3000", nil)
