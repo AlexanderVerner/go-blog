@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 
 	"./models"
@@ -14,43 +13,47 @@ import (
 
 var posts map[string]*models.Post
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
+func IndexHandler(rnd render.Render) {
+	/*t, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
-	}
+	}*/
 
 	fmt.Println(posts)
 
-	t.ExecuteTemplate(w, "index", posts)
+	rnd.HTML(200, "index", posts)
+
+	//t.ExecuteTemplate(w, "index", posts)
 }
 
-func writeHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("templates/write.html", "templates/header.html", "templates/footer.html")
+func writeHandler(rnd render.Render) {
+	/*t, err := template.ParseFiles("templates/write.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 	}
 
-	t.ExecuteTemplate(w, "write", nil)
+	t.ExecuteTemplate(w, "write", nil)*/
+
+	rnd.HTML(200, "write", nil)
 }
 
-func editHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("templates/write.html", "templates/header.html", "templates/footer.html")
+func editHandler(rnd render.Render, r *http.Request) {
+	/*t, err := template.ParseFiles("templates/write.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
-	}
-
+	}*/
 	id := r.FormValue("id")
 	post, found := posts[id]
 	if !found {
-		http.NotFound(w, r)
+		rnd.Redirect("/")
 	}
 
-	t.ExecuteTemplate(w, "write", post)
+	//t.ExecuteTemplate(w, "write", post)
 
+	rnd.HTML(200, "write", post)
 }
 
-func savePostHandler(w http.ResponseWriter, r *http.Request) {
+func savePostHandler(rnd render.Render, r *http.Request) {
 	id := r.FormValue("id")
 	title := r.FormValue("title")
 	content := r.FormValue("content")
@@ -66,18 +69,21 @@ func savePostHandler(w http.ResponseWriter, r *http.Request) {
 		posts[post.Id] = post
 	}
 
-	http.Redirect(w, r, "/", 302)
+	//http.Redirect(w, r, "/", 302)
+	rnd.Redirect("/")
 }
 
-func deleteHandler(w http.ResponseWriter, r *http.Request) {
+func deleteHandler(rnd render.Render, r *http.Request) {
 	id := r.FormValue("id")
 	if id == "" {
-		http.NotFound(w, r)
+		//http.NotFound(w, r)
+		rnd.Redirect("/")
 	}
 
 	delete(posts, id)
 
-	http.Redirect(w, r, "/", 302)
+	//http.Redirect(w, r, "/", 302)
+	rnd.Redirect("/")
 }
 
 func main() {

@@ -1,6 +1,3 @@
-{{ define "index" }} 
-
-{{ template "header" }}
 
 {{ range $key, $value := .}}
 <div class="row">
@@ -22,7 +19,3 @@
         </div>
     </div>
 {{ end }}
-
-{{ template "footer" }}
-    
-{{end}}
