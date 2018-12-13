@@ -9,6 +9,7 @@ import (
 
 	"github.com/codegangsta/martini"
 	"github.com/martini-contrib/render"
+	"github.com/russross/blackfriday"
 )
 
 var posts map[string]*models.Post
@@ -66,6 +67,13 @@ func deleteHandler(rnd render.Render, r *http.Request, params martini.Params) {
 	rnd.Redirect("/")
 }
 
+func getHtmlHandler(rnd render.Render, r *http.Request) {
+	md := r.FormValue("md")
+	htmlBytes := blackfriday.MarkdownBasic([]byte(md))
+
+	rnd.JSON(200, map[string]interface{}{"html": string(htmlBytes)})
+}
+
 func main() {
 	fmt.Println("Listening on port :3000")
 
@@ -90,5 +98,6 @@ func main() {
 	m.Get("/edit/:id", editHandler)
 	m.Get("/delete/:id", deleteHandler)
 	m.Post("/SavePost", savePostHandler)
+	m.Post("/write", getHtmlHandler)
 	m.Run()
 }
