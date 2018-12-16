@@ -3,6 +3,8 @@ package utils
 import (
 	"crypto/rand"
 	"fmt"
+
+	"github.com/russross/blackfriday"
 )
 
 func GenerateId() string {
@@ -11,6 +13,6 @@ func GenerateId() string {
 	return fmt.Sprintf("%x", b)
 }
 
-/*func ConvertMarkdownToHtml(markdown string) string {
+func ConvertMarkdownToHtml(markdown string) string {
 	return string(blackfriday.MarkdownBasic([]byte(markdown)))
-}*/
+}
