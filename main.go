@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"time"
 
 	"./db/documents"
 	"./models"
+	"./session"
 	"./utils"
 
 	"github.com/codegangsta/martini"
@@ -14,13 +16,43 @@ import (
 	"github.com/tobyzxj/mgo"
 )
 
+const (
+	COOCKIE_NAME = "sessionId"
+)
+
 var postsCollection *mgo.Collection
+var inMemorySession *session.Session
 
 func getLoginHandler(rnd render.Render) {
 	rnd.HTML(200, "login", nil)
 }
 
-func IndexHandler(rnd render.Render) {
+func postLoginHandler(rnd render.Render, r *http.Request, w http.ResponseWriter) {
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	fmt.Println(username)
+	fmt.Println(password)
+
+	sessionId := inMemorySession.Init(username)
+
+	coockie := &http.Cookie{
+		Name:    COOCKIE_NAME,
+		Value:   sessionId,
+		Expires: time.Now().Add(5 * time.Minute),
+	}
+
+	http.SetCookie(w, coockie)
+
+	rnd.Redirect("/")
+}
+
+func IndexHandler(rnd render.Render, r *http.Request) {
+	coockie, _ := r.Cookie(COOCKIE_NAME)
+	if coockie != nil {
+		fmt.Println(inMemorySession.Get(coockie.Value))
+	}
+
 	postDocuments := []documents.PostDocument{}
 	postsCollection.Find(nil).All(&postDocuments)
 	posts := []models.Post{}
@@ -95,6 +127,8 @@ func unescape(x string) interface{} {
 func main() {
 	fmt.Println("Listening on port :3000")
 
+	inMemorySession = session.NewSession()
+
 	sessions, err := mgo.Dial("localhost")
 	if err != nil {
 		panic(err)
@@ -120,6 +154,7 @@ func main() {
 	m.Use(martini.Static("assets", staticOptions))
 	m.Get("/", IndexHandler)
 	m.Get("/login", getLoginHandler)
+	m.Post("/login", postLoginHandler)
 	m.Get("/write", writeHandler)
 	m.Get("/edit/:id", editHandler)
 	m.Get("/delete/:id", deleteHandler)
